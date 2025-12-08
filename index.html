@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анкета клининговой компании</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50 p-4 md:p-8">
+    <div class="max-w-3xl mx-auto">
+        <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 p-8 text-white">
+                <h1 class="text-3xl font-bold mb-2">Анкета клининговой компании</h1>
+                <p class="text-purple-100" id="blockCounter">Блок 1 из 10</p>
+                <div class="mt-4 bg-white/20 rounded-full h-2 overflow-hidden">
+                    <div id="progressBar" class="h-full bg-white transition-all duration-500 ease-out" style="width: 10%"></div>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="p-8">
+                <div id="blockContent"></div>
+
+                <!-- Navigation -->
+                <div class="flex gap-3 mt-8" id="navigation">
+                    <button id="prevBtn" class="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-xl transition-all transform hover:scale-105" style="display: none;">
+                        Назад
+                    </button>
+                    <button id="nextBtn" class="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-xl transition-all transform hover:scale-105 shadow-lg">
+                        Далее
+                    </button>
+                </div>
+
+                <!-- Block Navigator -->
+                <div class="flex flex-wrap gap-2 mt-6 justify-center" id="blockNavigator"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const formData = {
+            name: '', address: '', phone: '', telegram: '',
+            housingType: [], area: '', bedrooms: '', bathrooms: '',
+            features: [], featureOther: '', hasChildren: null, hasPets: null,
+            allergies: '', cleaningTypes: [], timePreference: [], specificTime: '',
+            priorityZones: [], doNotTouch: '', additionalServices: [],
+            wantsGifts: null, comments: '', agreement: false, date: '', signature: ''
+        };
+
+        let currentBlock = 1;
+        const totalBlocks = 10;
+
+        const blocks = [
+            {
+                number: 1,
+                title: '📞 Контактные данные',
+                render: () => `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">📞 Контактные данные</h2>
+                    <div class="space-y-6">
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-700">💬 Имя</label>
+                            <input type="text" id="name" value="${formData.name}" placeholder="Как к вам правильно обращаться?" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-700">🏠 Адрес объекта</label>
+                            <input type="text" id="address" value="${formData.address}" placeholder="Можно указать только район — тоже подойдёт" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-700">📞 Телефон / WhatsApp</label>
+                            <input type="tel" id="phone" value="${formData.phone}" placeholder="Для связи в день уборки" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all">
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-700">✉️ Telegram (если есть)</label>
+                            <input type="text" id="telegram" value="${formData.telegram}" placeholder="@username" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all">
+                        </div>
+                    </div>
+                `
+            },
+            {
+                number: 2,
+                title: '🏠 Об объекте',
+                render: () => `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">🏠 Об объекте</h2>
+                    <div class="space-y-6">
+                        <div class="space-y-3">
+                            <label class="text-sm font-medium text-gray-700">Тип жилья:</label>
+                            <div class="flex flex-wrap gap-3">
+                                ${['Дом', 'Квартира', 'Таунхаус'].map(type => `
+                                    <button onclick="toggleArrayItem('housingType', '${type}')" class="px-6 py-3 rounded-xl font-medium transition-all transform hover:scale-105 ${formData.housingType.includes(type) ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}">
+                                        ${type}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-700">📌 Площадь (м²)</label>
+                            <input type="text" id="area" value="${formData.area}" placeholder="Точный размер не обязателен — нужен ориентир" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-gray-700">Спален:</label>
+                                <input type="number" id="bedrooms" value="${formData.bedrooms}" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-gray-700">Санузлов:</label>
+                                <input type="number" id="bathrooms" value="${formData.bathrooms}" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all">
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <label class="text-sm font-medium text-gray-700">Особенности дома:</label>
+                            <div class="space-y-2">
+                                ${['Несколько этажей', 'Большие окна', 'Дерево / натуральные поверхности', 'Камин'].map(feature => `
+                                    <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-all">
+                                        <input type="checkbox" ${formData.features.includes(feature) ? 'checked' : ''} onchange="toggleArrayItem('features', '${feature}')" class="w-5 h-5 text-purple-500 rounded focus:ring-2 focus:ring-purple-400">
+                                        <span class="text-gray-700">${feature}</span>
+                                    </label>
+                                `).join('')}
+                                <input type="text" id="featureOther" value="${formData.featureOther}" placeholder="Другое..." class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all mt-2">
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                number: 3,
+                title: '👥 Жильцы и чувствительность',
+                render: () => `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">👥 Жильцы и чувствительность</h2>
+                    <div class="space-y-6">
+                        <div class="space-y-3">
+                            <label class="text-sm font-medium text-gray-700">Есть дети?</label>
+                            <div class="flex gap-3">
+                                ${['Да', 'Нет'].map(option => `
+                                    <button onclick="setFormValue('hasChildren', '${option}')" class="flex-1 px-6 py-3 rounded-xl font-medium transition-all transform hover:scale-105 ${formData.hasChildren === option ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}">
+                                        ${option}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <label class="text-sm font-medium text-gray-700">Есть домашние животные?</label>
+                            <div class="flex gap-3">
+                                ${['Да', 'Нет'].map(option => `
+                                    <button onclick="setFormValue('hasPets', '${option}')" class="flex-1 px-6 py-3 rounded-xl font-medium transition-all transform hover:scale-105 ${formData.hasPets === option ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}">
+                                        ${option}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-700">🌿 Аллергии / чувствительность к запахам</label>
+                            <textarea id="allergies" rows="3" placeholder="Мы подстроим химию" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all resize-none">${formData.allergies}</textarea>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                number: 4,
+                title: '🕐 Тип уборки и расписание',
+                render: () => `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">🕐 Тип уборки и расписание</h2>
+                    <div class="space-y-6">
+                        <div class="space-y-3">
+                            <label class="text-sm font-medium text-gray-700">Что требуется?</label>
+                            <div class="grid grid-cols-2 gap-3">
+                                ${['Генеральная', 'Поддерживающая', 'После ремонта', 'До/после переезда', 'Глубокая', 'Регулярная уборка'].map(type => `
+                                    <button onclick="toggleArrayItem('cleaningTypes', '${type}')" class="px-4 py-3 rounded-xl font-medium text-sm transition-all transform hover:scale-105 ${formData.cleaningTypes.includes(type) ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}">
+                                        ${type}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="space-y-3">
+                            <label class="text-sm font-medium text-gray-700">Удобное время:</label>
+                            <div class="flex gap-3">
+                                ${['Утро', 'День', 'Вечер'].map(time => `
+                                    <button onclick="toggleArrayItem('timePreference', '${time}')" class="flex-1 px-6 py-3 rounded-xl font-medium transition-all transform hover:scale-105 ${formData.timePreference.includes(time) ? 'bg-gradient-to-r from-indigo-500 to-purple-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}">
+                                        ${time}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-sm font-medium text-gray-700">Часы (если важно):</label>
+                            <input type="text" id="specificTime" value="${formData.specificTime}" placeholder="Например: 10:00 - 14:00" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all">
+                        </div>
+                    </div>
+                `
+            },
+            {
+                number: 5,
+                title: '✨ Приоритетные зоны',
+                render: () => `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">✨ Приоритетные зоны</h2>
+                    <p class="text-sm text-gray-600 mb-4">✨ Отметьте 2–3 самые важные зоны</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        ${['Кухня', 'Ванная', 'Туалет', 'Спальни', 'Гостиная', 'Детская', 'Балкон / Терраса', 'Внутри шкафов', 'Мытьё окон'].map(zone => `
+                            <button onclick="toggleArrayItem('priorityZones', '${zone}')" class="px-4 py-3 rounded-xl font-medium text-sm transition-all transform hover:scale-105 ${formData.priorityZones.includes(zone) ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}">
+                                ${zone}
+                            </button>
+                        `).join('')}
+                    </div>
+                `
+            },
+            {
+                number: 6,
+                title: '🛑 Что нельзя трогать',
+                render: () => `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">🛑 Что нельзя трогать</h2>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-gray-700">🛑 Например: документы, косметика, коллекции, техника</label>
+                        <textarea id="doNotTouch" rows="4" placeholder="Укажите предметы и зоны..." class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all resize-none">${formData.doNotTouch}</textarea>
+                    </div>
+                `
+            },
+            {
+                number: 7,
+                title: '✨ Дополнительные услуги',
+                render: () => `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">✨ Дополнительные услуги</h2>
+                    <div class="space-y-2 max-h-96 overflow-y-auto pr-2">
+                        ${[
+                            'Чистка матрасов (антиклещ)', 'Чистка мягкой мебели', 'Чистка духовки',
+                            'Чистка холодильника', 'Мытьё фасадов / террас', 'Мытьё солнечных панелей',
+                            'Мытьё оконных рам', 'Дезинфекция', 'Озонация', 'Удаление неприятных запахов',
+                            'Удаление плесени', 'Сушка после затоплений', 'Чистка штор',
+                            'Химчистка ковров', 'Чистка техники и книг «сухим туманом»'
+                        ].map(service => `
+                            <label class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-all">
+                                <input type="checkbox" ${formData.additionalServices.includes(service) ? 'checked' : ''} onchange="toggleArrayItem('additionalServices', '${service}')" class="w-5 h-5 text-purple-500 rounded focus:ring-2 focus:ring-purple-400">
+                                <span class="text-gray-700">${service}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                `
+            },
+            {
+                number: 8,
+                title: '🎁 Подарки от компании',
+                render: () => `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">🎁 Подарки от компании</h2>
+                    <div class="space-y-4">
+                        <p class="text-sm text-gray-600">🎀 Подарки — необязательные и только по желанию клиента</p>
+                        <div class="space-y-3">
+                            <label class="text-sm font-medium text-gray-700">Хотите получать небольшие подарки после уборки?</label>
+                            <div class="flex gap-3">
+                                ${['Да', 'Нет'].map(option => `
+                                    <button onclick="setFormValue('wantsGifts', '${option}')" class="flex-1 px-6 py-3 rounded-xl font-medium transition-all transform hover:scale-105 ${formData.wantsGifts === option ? 'bg-gradient-to-r from-pink-500 to-rose-500 text-white shadow-lg' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}">
+                                        ${option}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="bg-gradient-to-r from-pink-50 to-purple-50 p-4 rounded-xl">
+                            <p class="text-sm text-gray-600">Например:</p>
+                            <p class="text-sm text-gray-600">— приятные мелочи для дома</p>
+                            <p class="text-sm text-gray-600">— подарки детям</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                number: 9,
+                title: '💬 Комментарии',
+                render: () => `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">💬 Комментарии</h2>
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-gray-700">✨ Ваши пожелания помогают настроить сервис под вас</label>
+                        <textarea id="comments" rows="5" placeholder="Дополнительные комментарии и пожелания..." class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all resize-none">${formData.comments}</textarea>
+                    </div>
+                `
+            },
+            {
+                number: 10,
+                title: '✅ Подтверждение',
+                render: () => `
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">✅ Подтверждение</h2>
+                    <div class="space-y-6">
+                        <label class="flex items-start gap-3 p-4 rounded-lg hover:bg-gray-50 cursor-pointer transition-all">
+                            <input type="checkbox" id="agreement" ${formData.agreement ? 'checked' : ''} onchange="setFormValue('agreement', this.checked)" class="w-5 h-5 text-purple-500 rounded focus:ring-2 focus:ring-purple-400 mt-1">
+                            <span class="text-gray-700">Я согласен с условиями обслуживания</span>
+                        </label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-gray-700">Дата:</label>
+                                <input type="date" id="date" value="${formData.date}" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-sm font-medium text-gray-700">Подпись:</label>
+                                <input type="text" id="signature" value="${formData.signature}" placeholder="Ваша подпись" class="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-purple-400 focus:outline-none transition-all">
+                            </div>
+                        </div>
+                        ${formData.agreement ? `
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-xl text-center">
+                                <svg class="w-12 h-12 text-green-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <p class="text-green-700 font-medium">Спасибо! Анкета готова к отправке</p>
+                            </div>
+                        ` : ''}
+                    </div>
+                `
+            }
+        ];
+
+        function renderBlock() {
+            saveCurrentBlockData();
+            const block = blocks[currentBlock - 1];
+            document.getElementById('blockContent').innerHTML = block.render();
+            document.getElementById('blockCounter').textContent = `Блок ${currentBlock} из ${totalBlocks}`;
+            document.getElementById('progressBar').style.width = `${(currentBlock / totalBlocks) * 100}%`;
+            
+            document.getElementById('prevBtn').style.display = currentBlock > 1 ? 'block' : 'none';
+            document.getElementById('nextBtn').textContent = currentBlock < totalBlocks ? 'Далее' : 'Завершить';
+            
+            renderBlockNavigator();
+        }
+
+        function renderBlockNavigator() {
+            const navigator = document.getElementById('blockNavigator');
+            navigator.innerHTML = blocks.map(block => `
+                <button onclick="goToBlock(${block.number})" class="w-10 h-10 rounded-lg font-medium transition-all transform hover:scale-110 ${currentBlock === block.number ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}">
+                    ${block.number}
+                </button>
+            `).join('');
+        }
+
+        function saveCurrentBlockData() {
+            const fields = ['name', 'address', 'phone', 'telegram', 'area', 'bedrooms', 'bathrooms', 
+                          'featureOther', 'allergies', 'specificTime', 'doNotTouch', 'comments', 'date', 'signature'];
+            fields.forEach(field => {
+                const el = document.getElementById(field);
+                if (el) formData[field] = el.value;
+            });
+            
+            const agreement = document.getElementById('agreement');
+            if (agreement) formData.agreement = agreement.checked;
+        }
+
+        function toggleArrayItem(field, value) {
+            const index = formData[field].indexOf(value);
+            if (index > -1) {
+                formData[field].splice(index, 1);
+            } else {
+                formData[field].push(value);
+            }
+            renderBlock();
+        }
+
+        function setFormValue(field, value) {
+            formData[field] = value;
+            renderBlock();
+        }
+
+        function goToBlock(blockNumber) {
+            currentBlock = blockNumber;
+            renderBlock();
+        }
+
+        document.getElementById('prevBtn').addEventListener('click', () => {
+            if (currentBlock > 1) {
+                currentBlock--;
+                renderBlock();
+            }
+        });
+
+        document.getElementById('nextBtn').addEventListener('click', () => {
+            if (currentBlock < totalBlocks) {
+                currentBlock++;
+                renderBlock();
+            } else {
+                saveCurrentBlockData();
+                alert('Анкета отправлена! Спасибо!\n\n' + JSON.stringify(formData, null, 2));
+            }
+        });
+
+        renderBlock();
+    </script>
+</body>
+</html>
