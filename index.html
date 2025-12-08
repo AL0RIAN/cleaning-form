@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Анкета клининговой компании</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+        emailjs.init("O93cZUSMZMZoLwHQe"); /* Комментарий: сюда вставляешь Public Key */
+    </script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
@@ -370,14 +374,79 @@
             }
         });
 
+        async function sendFormViaEmailJS() {
+            // Комментарий: собираем все данные перед отправкой
+            saveCurrentBlockData();
+
+            const templateParams = {
+                /* Контакты */
+                name: formData.name,
+                address: formData.address,
+                phone: formData.phone,
+                telegram: formData.telegram,
+
+                /* Об объекте */
+                housingType: formData.housingType.join(', '),
+                area: formData.area,
+                bedrooms: formData.bedrooms,
+                bathrooms: formData.bathrooms,
+                features: formData.features.join(', '),
+                featureOther: formData.featureOther,
+
+                /* Жильцы */
+                hasChildren: formData.hasChildren,
+                hasPets: formData.hasPets,
+                allergies: formData.allergies,
+
+                /* Уборка */
+                cleaningTypes: formData.cleaningTypes.join(', '),
+                timePreference: formData.timePreference.join(', '),
+                specificTime: formData.specificTime,
+
+                /* Зоны */
+                priorityZones: formData.priorityZones.join(', '),
+                doNotTouch: formData.doNotTouch,
+                additionalServices: formData.additionalServices.join(', '),
+
+                /* Прочее */
+                wantsGifts: formData.wantsGifts,
+                comments: formData.comments,
+                agreement: formData.agreement ? 'Да' : 'Нет',
+                date: formData.date,
+                signature: formData.signature
+            };
+
+            try {
+                /* Комментарий: отправка данных через EmailJS */
+                const result = await emailjs.send(
+                    "service_if649gz",     // Комментарий: Service ID
+                    "template_e3p7hml",    // Комментарий: Template ID
+                    templateParams
+                );
+
+                alert("Анкета успешно отправлена!");
+            } catch (error) {
+                alert("Ошибка при отправке. Попробуйте позже.");
+                console.error(error);
+            }
+        }
+
+
         document.getElementById('nextBtn').addEventListener('click', () => {
             if (currentBlock < totalBlocks) {
                 currentBlock++;
                 renderBlock();
             } else {
-                saveCurrentBlockData();
-                alert('Анкета отправлена! Спасибо!\n\n' + JSON.stringify(formData, null, 2));
+                // Комментарий: на последнем шаге — отправка
+                sendFormViaEmailJS();
             }
+            // if (currentBlock < totalBlocks) {
+            //     currentBlock++;
+            //     renderBlock();
+            // } else {
+            //     saveCurrentBlockData();
+            //     alert('Анкета отправлена! Спасибо!\n\n' + JSON.stringify(formData, null, 2));
+            // }
         });
 
         renderBlock();
